@@ -1,0 +1,336 @@
+---
+title: "script_1"
+format: pdf
+editor: visual
+---
+
+# Chapter 1
+
+## R as a calculator
+
+R can be used as a calculator. For example, to calculate the square root of the absolute difference between $3^2$ and $4^2$, you can use the following code:
+
+```{r, eval=FALSE}
+3^2
+exp(2)
+log(10)
+log10(10)
+sqrt(abs(3^2-4^2))
+```
+
+## Objects in R
+
+You can assign values to objects in R using `<-` or `=` and calculate with them like with numbers. For example:
+
+```{r, eval=FALSE}
+test <- 56
+test2 <- 124251762
+
+test + test2
+test * test2  
+```
+
+Objects in workspace can be listed with `ls()` and removed with `rm()`. For example:
+
+```{r, eval=FALSE}
+ls()
+rm(test)
+```
+
+## Exercise
+
+Solutions to exercises are as follows
+
+```{r, eval=FALSE}
+3^2
+sqrt(9)
+pi^2
+sqrt(abs(3^2-4^2))
+
+test <- 3^2
+test2 <- 4^2
+test3 <- abs(test - test2)
+sqrt(test3)
+
+log(exp(4))
+log(exp(4), base = exp(1))
+log(100, base = 10)
+
+factorial(8)
+exp(factorial(3))
+```
+
+# Chapter 2
+
+## Functions in R
+
+Functions are called by passing arguments to them. For example:
+
+```{r, eval=FALSE}
+mean(5)
+mean(x = 5)
+mean(y = 5)
+mean(x="test")
+mean(x = test)
+```
+
+Functions can also be defined by the user using the `function` keyword. For example:
+
+```{r, eval=FALSE}
+foo <- function(x, y){
+  x^2+y^2
+}
+foo(y=3, x=5)
+```
+
+Note that functions should only use the arguments that are defined in the arguments section. Avoid using global variables in functions like this
+
+```{r, eval=FALSE}
+foo <- function(x, y){
+  x^2+y^2+ test
+}
+foo(y=3, x=5)
+```
+
+## Exercises
+
+1. Formulate the EOQ formula in R
+```{r, exe2-1,  echo=T, include=T, collapse=TRUE}
+cost_eoq_fun <- function(q, d, co, cl) {
+  # returns total cost per period
+  # d...demand
+  # q...lot size
+  # co...ordering cost
+  # cl...stock holding cost
+  ((1/2)*cl*q)+((d/q)*co)
+}
+
+# test cost function
+cost_eoq_fun(d=100, q=20, cl = .1, co = 50)
+
+eoq_fun <- function(co, d, cl) {
+  # return optimal lot size
+  # d...demand
+  # co...ordering cost
+  # cl...stock holding cost
+  sqrt((2*co*d)/cl)
+}
+# optimal lot size
+q.star <-  eoq_fun(d = 100, cl = .1, co = 50)
+# optimal cost
+cost_eoq_fun(d=100, q=q.star, cl = .1, co = 50)
+```
+
+2. Derive a function for calculating weighted Euclidean distance between two points.
+```{r, exe2-2,  echo=T, include=T, collapse=TRUE}
+weuc_d2_func <- function(x,y,w) {
+  # calculates weighted Euclidean distance between x and y
+  # y,x...vectors
+  # w.. weight vector
+  sqrt(sum(w*(x-y)^2))
+}
+# test distacne function
+weuc_d2_func(x = c(1,2,3), y= c(3,2,1), w=c(1,1,1) )
+# result should be sqrt(8)
+```
+
+Alternatively use intermediate variables within the function
+
+```{r, exe2-2a,  echo=T, include=T, collapse=TRUE}
+weuc_d2_func <- function(x,y,w) {
+  # calculates weighted Euclidean distance between x and y
+  # y,x...vectors
+  # w.. weight vector
+  tmp.diff <- (x-y)
+  tmp.diff.sq <- tmp.diff^2
+  tmp.result <- w*sqrt(tmp.diff.sq)
+  return(tmp.result)
+}
+# test distacne function
+weuc_d2_func(x = c(1,2,3), y= c(3,2,1), w=c(1,1,1) )
+# result should be sqrt(8)
+```
+
+
+3. Formulate a function for the Geometric Poisson density distribution.
+```{r, exe2-3,  echo=T, include=T, collapse=TRUE}
+geom_pois_dens_fun <- function(n, lambda, theta){
+  # calculates density value of geometric Poisson distribution
+  # n...integer, demand/successes, theta,lambda..parameters
+  k.vec <- 1:n
+  sum(exp(-lambda)*lambda^k.vec/factorial(k.vec)*(1-theta)^(n-k.vec)*choose(n-1, k.vec-1))
+}
+# test function
+geom_pois_dens_fun(n=3, lambda=.5, theta = 2)
+```
+
+
+
+# Chapter 3
+
+Basics on data types and data manipulation
+
+## Create vectors
+
+There are numerous ways to create vectors in R. For example, you can use the `c()` function to concatenate elements into a vector:
+
+```{r, eval=FALSE}
+x <- c(1,2,3,4,5)
+# not working as expected because different data types
+y <- c(1,2,3,5, "test")
+y <- 1:5
+rep(x = y, times = 10)
+x <- rep(x = y,  each = 10)
+z <- c(y,x)
+zz <- seq(from = 10, to = 35, by =.25)
+```
+
+## Create matrices
+
+Matrices can be created by combining vectors or using `matrix()`. For example:
+
+```{r, eval=FALSE}
+# matrix with numbers
+A <- matrix(1:9, ncol=3)
+# matrix with characters
+B <- matrix(letters[1:9], ncol=3)
+# matrix by column-binding
+C <- cbind(c(1,2,3,4,5), c(6,7,8,9,10))
+# for data frames similar
+df.1 <-  data.frame(zz[1:30], as.character(zz[1:30]))
+```
+
+## Indexing vectors and matrices
+
+Vectors and matrices can be indexed using square brackets. For example:
+
+```{r, eval=FALSE}
+x <- 1:10
+# first element
+x[1]
+# first five elements
+x[1:5]
+# last element
+x[-1]
+# elements greater than 5
+x[x>5]
+
+A <- matrix(1:9, ncol=3)
+# single element
+A[1,2]
+# first row
+A[1,]
+# first column
+A[,1]
+# first two rows
+A[1:2,]
+```
+
+## Biathlon data set
+
+The biathlon data set should be imported by "import dataset" menu. Once imported as object `biathlon_results_women` you can access it as follows:
+
+```{r, eval=FALSE}
+# View DataFrame
+View(biathlon_results_women)
+
+# overview on race types
+table(biathlon_results_women$type)
+
+# overview on competition types
+table(biathlon_results_women$competition)
+
+# filter for sprint races only
+tmp.id.S <- biathlon_results_women$competition == "S"
+df.sprint <- biathlon_results_women[tmp.id.S, ]
+# mean of total tiem
+mean(df.sprint$tot.time)
+
+# filter with tidyverse
+library(tidyverse)
+biathlon_results_women %>% 
+  filter(competition == "S") %>% 
+  select(tot.time) %>% 
+  unlist() %>% 
+  mean()
+```
+     
+
+
+## Exercises
+
+1. Calculate the outer product of two vectors (without outer())
+```{r, exe3-1,  echo=T, include=T, collapse=TRUE}
+x <- 1:5
+y <- 10:6
+as.matrix(x) %*% t(as.matrix(y))
+outer(x,y)
+```
+
+
+2. Define a function that calculates the trace of a matrix.
+```{r, exe3-2,  echo=T, include=T, collapse=TRUE}
+trace_func <- function(z){
+  # calculates trace of z
+  # z...matrix
+  sum(diag(z))
+} 
+tmp <- rnorm(9)
+A <- matrix(tmp, ncol=3, byrow = T)
+trace_func(A)
+```
+
+
+3. Create a vector containing the first 100 Fibonacci numbers.
+Most commonly, the Fibonacci numbers are defined recursively by $F_n=F_{n-1}+F_{n-2}$ whereby $F_0 =0$ and $F_1=1$. However, there is also an explicit formulation: $F_n = \sum_{k=0}^{\lfloor \frac{n-1}{2} \rfloor} \binom{n-k-1}{k}$ (check [here](https://en.wikipedia.org/wiki/Fibonacci_number#Mathematics))
+
+```{r, exe3-3,  echo=T, include=T, collapse=TRUE}
+fib_num_fun <- function(n){
+  # calculate nth Fibonacci number
+  # n...number
+  k.vec <- 0:floor((n-1)/2)
+  sum(choose(n-k.vec-1, k.vec))
+}
+# vectorize fib_num_fun such that it accepts input vectors
+vfib_num_fun <- Vectorize(fib_num_fun)
+# doesn't work
+fib_num_fun(1:10)
+# works
+vfib_num_fun(1:100)
+```
+
+4. Create a matrix containing the all binominal coefficients up to $n = 50$
+```{r, exe3-4,  echo=T, include=T, collapse=TRUE}
+pas <- outer(1:10, 1:10, choose)
+```
+
+5. Create a list containing
+-- vector of 5 small letters
+-- vector of 5 capital letters
+-- vector of 5 random numbers
+
+```{r, exe3-5-new,  echo=T, include=T, collapse=TRUE}
+l1 <- list(small = letters[1:5], capital = LETTERS[1:5], random = rnorm(5))
+```
+
+6. Create a matrix with dimension 4×4 and fill it with random numbers.
+
+```{r, exe3-6-new,  echo=T, include=T, collapse=TRUE}
+# set random seed
+set.seed(123)
+A <- matrix(rnorm(16), ncol=4)
+```
+
+7. For the matrix generated in task 6, check whether its invertable.
+
+```{r, exe3-7,  echo=T, include=T, collapse=TRUE}
+det(A) != 0
+```
+
+8. For the matrix generated in task 6, check whether it is symmetric.
+
+```{r, exe3-8,  echo=T, include=T, collapse=TRUE}
+A == t(A)
+```
+
+
