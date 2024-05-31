@@ -23,6 +23,63 @@ tmp.data.person.sprint <- biathlon_results_women %>%
 View(tmp.data.person.sprint)
 ```
 
+## Plotting with plotly
+
+
+```{r}
+library(plotly)
+data("iris")                                                                                    # load iris data set 
+plot_ly(data = iris, x = ~Sepal.Length, y = ~Petal.Length, text = ~Species)
+
+plot_ly(iris, x = ~Sepal.Length, y = ~Petal.Width, type = "box")
+
+
+fig2 <- plot_ly(data = iris, x = ~Sepal.Length, y = ~Petal.Length, color = ~Species, text = ~Species)  # grouped Scatterplot
+fig3 <- plot_ly(iris, x = ~Species, y = ~Petal.Width, type = "box")                                    # Boxplot
+fig4 <- plot_ly(iris, x = ~Sepal.Length, color = ~Species, alpha = 0.6) %>% layout(barmode = "overlay")# overlaid histograms
+
+subplot(fig1, fig2, fig3, fig4, nrows = 2)                                                             # subplots
+
+```
+
+Plot of race speed over season
+```{r}
+fig1 <- tmp.data.person.sprint %>% 
+  plot_ly(x=~season, y = ~speed,  type="box")
+
+export(fig1, file = "image.png")
+```
+
+Plot of race speed over season and competition type
+```{r}
+biathlon_results_women %>%
+  filter(name == tmp.person) %>% 
+  plot_ly(x=~season, y = ~speed, color = ~competition,  type="box")%>% layout(boxmode = "group")
+
+```
+
+Overlaid histograms of two athletes for race type "sprint" (S) over all seasons
+
+```{r}
+# Using Plotly build-in function
+biathlon_results_women %>%
+  filter(name %in% c("NEUNER Magdalena", "BRAISAZ Justine"), competition == "S") %>% 
+  plot_ly(x = ~speed, color = ~name, alpha = 0.6) %>% 
+  layout(barmode = "overlay")
+
+# using plotly overlays
+tmp.1 <- biathlon_results_women %>%
+  filter(name %in% c("NEUNER Magdalena"), competition == "S")
+tmp.2 <- biathlon_results_women %>%
+  filter(name %in% c("BRAISAZ Justine"), competition == "S")
+
+fig <- plot_ly(alpha = 0.6)
+fig <- fig %>% add_histogram(x= ~tmp.1$speed, name = "NEUNER Magdalena")
+fig <- fig %>% add_histogram(x = ~tmp.2$speed, name ="BRAISAZ Justine")
+fig %>%  layout(barmode = "overlay")
+```
+
+
 # Chapter 6
 
 Try to calculate the means and standard deviations of skiing speeds over season and competition type
@@ -52,7 +109,6 @@ tmp.mean.person.sprint %>%
 tmp.mean.person.sprint %>% 
    pivot_longer(cols = c(mean, sd), names_to = "function", values_to = "value")
 ```
-
 
 
 # Excercises from book
