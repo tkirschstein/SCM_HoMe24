@@ -231,6 +231,10 @@ A[1:2,]
 The biathlon data set should be imported by "import dataset" menu. Once imported as object `biathlon_results_women` you can access it as follows:
 
 ```{r, eval=FALSE}
+# read data set
+library(readr)
+biathlon_results_women <- read_csv("data/biathlon_results_women.csv")
+View(biathlon_results_women)
 # View DataFrame
 View(biathlon_results_women)
 
