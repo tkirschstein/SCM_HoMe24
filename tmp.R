@@ -17,8 +17,22 @@ i.0 <- 20
 
 d.vec <- rnorm(n = n, mean = 10, sd = 2)
 d.vec <- round(d.vec, digits = 0)
+i.vec <- numeric(n)
 
-for(){
+for(i in 1:n){
   
-  
+  if(i == 1){
+    i.vec[i] <- i.0 
+    } 
+  else{
+    if(i %% 4 == 0){
+      i.vec[i] <- i.vec[i-1] + 40 - d.vec[i]
+    }
+    else{
+      i.vec[i] <- i.vec[i-1] - d.vec[i]
+    }
+  }
 }
+
+# plot inventory level and demand vector as a step function
+
