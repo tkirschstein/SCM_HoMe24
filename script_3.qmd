@@ -1,0 +1,120 @@
+---
+title: "script_3"
+author: "Thomas Kirschstein"
+format: html
+editor: visual
+---
+
+## Homework Newsvendor model
+
+The total cost in the normal newsvendor model is given by
+$$ Z(q) = \left(c_u + c_o \right) \cdot \sigma \cdot \left( \varphi(q') + q' \cdot \Phi(q') \right) - c_u \cdot (q-\mu) $$ 
+with $q' = \frac{q-\mu}{\sigma}$
+
+```{r}
+newsven.obj.fun <- function(q, cu, co, mu, sigma){
+  # integrant functions --> important: First argument has to be x
+  upper.int.func <- function(x) { (x - q) * dnorm(x, mean = mu, sd = sigma) }
+  lower.int.func <- function(x) { (q - x) * dnorm(x, mean = mu, sd = sigma) }
+  
+  # use integrate(), note  that you have to retrieve function value
+  cu * integrate( upper.int.func , lower = q, upper = Inf)$value + co * integrate( lower.int.func , lower = 0, upper = q)$value
+}
+```
+
+Calculate the objective value at $q = 120$ for an example with $c_u = 2$, $c_o = 0.5$, $\mu = 100$, and $\sigma = 20$:
+
+```{r}
+newsven.obj.fun(q = 120 , mu = 100, cu = 2, co = 0.5, sigma = 20)
+```
+Test, whether the function also accepts vectors.
+
+```{r, eval = F}
+q.newsvendor.vec <- seq(90, 125, length.out = 100)
+obj.newsvendor.vec <- newsven.obj.fun(q = q.newsvendor.vec , mu = 100, cu = 2, co = 0.5, sigma = 20)
+```
+
+Try to automatically transform `newsven.obj.fun` into a function accepting vectors by `Vectorize()`
+
+```{r}
+newsven.obj.vectorized.fun <- Vectorize(newsven.obj.fun)
+q.newsvendor.vec <- seq(90, 125, length.out = 100)
+obj.newsvendor.vec <- newsven.obj.vectorized.fun(q = q.newsvendor.vec , mu = 100, cu = 2, co = 0.5, sigma = 20)
+```
+
+Plot the objective function values via Plotly
+
+```{r, echo=TRUE}
+suppressPackageStartupMessages(library(plotly))
+suppressPackageStartupMessages(library(tidyverse))
+
+plot_ly(x = q.newsvendor.vec, y = obj.newsvendor.vec, type = "scatter", mode ="line")
+
+```
+
+## Exercises
+
+5. Formulate a loop that calculates the inventory records over $n$ periods based on an initial stock level (say $i_0 = 20$) where every 4 periods 40 units arrive at the inventory. Sample the demand for each period from a normal distribution with $\mathcal{D} \sim N(10, 2)$ and round to integers.
+
+```{r, exe-5, collapse=TRUE, echo=TRUE, cache=F}
+n <- 50
+i.vec <- numeric(n)
+d.vec <- round(rnorm(n, mean = 10, sd = 2))
+i.vec[1] <- 30 - d.vec[1]
+for(i in 2:n){
+  if(i  %% 4 == 0){
+    i.vec[i] <- i.vec[i-1] - d.vec[i] + 40
+  }
+  else{
+    i.vec[i] <- i.vec[i-1] - d.vec[i]
+  }
+}
+
+plot_ly(x = 1:n, y = i.vec, type = "scatter", mode = "lines" , line = list(shape = "hv"), name = "inventory level") %>% 
+  add_lines(y = d.vec, name = "demand", line = list(shape = "linear"))
+```
+
+7. Formulate a function that performs 1st-order exponential smoothing: $p_{t+1} = (1-\alpha) \cdot p_t + \alpha \cdot x_t$. Is there also an builtin function? If so, compare run times.
+
+```{r, exe-7, collapse=TRUE, echo=TRUE, cache=F}
+first.exsm <- function(alpha, d, p.ini){
+  n <-length(d)
+  p <- numeric(n+1)
+  p[1] <- p.ini
+  for(i in 1:n){
+    p[i+1] <- (1-alpha) * p[i] + alpha * d[i]
+  }
+  return(p)
+}
+n <- 1e+6
+d.vec <- rnorm(n, 10, 2)
+system.time(p.vec <- first.exsm(alpha = 0.4, d = d.vec, p.ini = 10))
+# Alt. built-in function: ses() for 1st-order ES
+library(forecast)
+system.time(p.bi2 <- ses(d.vec, alpha = 0.4, h=1, initial = "simple"))
+```
+
+
+2. Formulate the Newsvendor model and use `optim()` to find the optimal order quantity. Compare the optimal solution found by `optim()` with the theoretical optimum.
+
+```{r, exe-2, collapse=TRUE, echo=TRUE, cache=F}
+# example data
+mu <- 100
+sigma <- 20
+co <- .25
+cu <- 1
+
+# find optimum
+system.time(opt.news <- optim(par = 100, fn = newsven.obj.fun, lower = 0, upper = 200, method="L-BFGS-B", co = co, cu = cu, sigma = sigma, mu=mu))
+
+# theoretical optimum
+cr <- cu/(cu+co) # critical ratio
+
+q.star <- qnorm(cr, mean=mu, sd = sigma) 	# direct
+q.star <- mu + sigma * qnorm(cr) 			    # transformation
+
+# difference numerical vs. theoretical optimum
+opt.news$par - q.star
+# --> quite close
+```
+
