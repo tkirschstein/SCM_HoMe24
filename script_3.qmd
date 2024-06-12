@@ -7,9 +7,7 @@ editor: visual
 
 ## Homework Newsvendor model
 
-The total cost in the normal newsvendor model is given by
-$$ Z(q) = \left(c_u + c_o \right) \cdot \sigma \cdot \left( \varphi(q') + q' \cdot \Phi(q') \right) - c_u \cdot (q-\mu) $$ 
-with $q' = \frac{q-\mu}{\sigma}$
+The total cost in the normal newsvendor model is given by $$ Z(q) = \left(c_u + c_o \right) \cdot \sigma \cdot \left( \varphi(q') + q' \cdot \Phi(q') \right) - c_u \cdot (q-\mu) $$ with $q' = \frac{q-\mu}{\sigma}$
 
 ```{r}
 newsven.obj.fun <- function(q, cu, co, mu, sigma){
@@ -27,6 +25,7 @@ Calculate the objective value at $q = 120$ for an example with $c_u = 2$, $c_o =
 ```{r}
 newsven.obj.fun(q = 120 , mu = 100, cu = 2, co = 0.5, sigma = 20)
 ```
+
 Test, whether the function also accepts vectors.
 
 ```{r, eval = F}
@@ -54,7 +53,7 @@ plot_ly(x = q.newsvendor.vec, y = obj.newsvendor.vec, type = "scatter", mode ="l
 
 ## Exercises
 
-5. Formulate a loop that calculates the inventory records over $n$ periods based on an initial stock level (say $i_0 = 20$) where every 4 periods 40 units arrive at the inventory. Sample the demand for each period from a normal distribution with $\mathcal{D} \sim N(10, 2)$ and round to integers.
+5.  Formulate a loop that calculates the inventory records over $n$ periods based on an initial stock level (say $i_0 = 20$) where every 4 periods 40 units arrive at the inventory. Sample the demand for each period from a normal distribution with $\mathcal{D} \sim N(10, 2)$ and round to integers.
 
 ```{r, exe-5, collapse=TRUE, echo=TRUE, cache=F}
 n <- 50
@@ -74,7 +73,7 @@ plot_ly(x = 1:n, y = i.vec, type = "scatter", mode = "lines" , line = list(shape
   add_lines(y = d.vec, name = "demand", line = list(shape = "linear"))
 ```
 
-7. Formulate a function that performs 1st-order exponential smoothing: $p_{t+1} = (1-\alpha) \cdot p_t + \alpha \cdot x_t$. Is there also an builtin function? If so, compare run times.
+7.  Formulate a function that performs 1st-order exponential smoothing: $p_{t+1} = (1-\alpha) \cdot p_t + \alpha \cdot x_t$. Is there also an builtin function? If so, compare run times.
 
 ```{r, exe-7, collapse=TRUE, echo=TRUE, cache=F}
 first.exsm <- function(alpha, d, p.ini){
@@ -94,8 +93,7 @@ library(forecast)
 system.time(p.bi2 <- ses(d.vec, alpha = 0.4, h=1, initial = "simple"))
 ```
 
-
-2. Formulate the Newsvendor model and use `optim()` to find the optimal order quantity. Compare the optimal solution found by `optim()` with the theoretical optimum.
+2.  Formulate the Newsvendor model and use `optim()` to find the optimal order quantity. Compare the optimal solution found by `optim()` with the theoretical optimum.
 
 ```{r, exe-2, collapse=TRUE, echo=TRUE, cache=F}
 # example data
@@ -117,4 +115,3 @@ q.star <- mu + sigma * qnorm(cr) 			    # transformation
 opt.news$par - q.star
 # --> quite close
 ```
-
